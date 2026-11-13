@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boiler Outdoor Reset Calculator for FS30.</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color-scheme:light;background:#f4f6f9;color:#152033}*{box-sizing:border-box}body{margin:0;padding:24px 14px}.wrap{max-width:820px;margin:auto}header{margin-bottom:20px}h1{font-size:clamp(1.55rem,4vw,2.1rem);margin:0 0 7px}p{line-height:1.5;color:#58677b;margin:5px 0 12px}.card{background:white;border:1px solid #e1e6ed;border-radius:14px;padding:20px;margin:14px 0;box-shadow:0 2px 8px #162b4b08}h2{font-size:1.05rem;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;font-size:.85rem;font-weight:650;margin-bottom:6px}.field input{width:100%;font-size:1.05rem;padding:11px 12px;border-radius:9px;border:1px solid #b8c4d3;background:#fff;color:#172439}.field input:focus{outline:2px solid #3d82de;outline-offset:1px}.field small{display:block;margin-top:5px;color:#637286}.result{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:#e9f2ff;border:1px solid #c7dcfb}.result .number{font-size:3.2rem;line-height:1.05;font-weight:750;font-variant-numeric:tabular-nums;color:#104a9a}.result .label{font-weight:700;color:#204064}.result .sub{font-size:.88rem;color:#526886}.controls{display:flex;align-items:center;gap:10px}.controls input[type=range]{width:100%;accent-color:#176dcc}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;background:#f3f6fa;border-radius:8px;padding:12px;color:#28374f}.chart{width:100%;height:auto;display:block}.legend{font-size:.82rem;color:#66768a}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#e07928;margin:0 6px 0 15px}.line{display:inline-block;width:17px;height:3px;background:#2673c8;vertical-align:middle;margin-right:6px}.actions{display:flex;justify-content:flex-end;margin-top:10px}button{background:#fff;border:1px solid #b7c5d5;border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:600;color:#264263}button:hover{background:#f0f5fb}.error{color:#b02331;font-weight:600;min-height:1.2em;font-size:.88rem}.foot{font-size:.85rem}.muted{color:#64748b}@media(max-width:520px){.grid{grid-template-columns:1fr}.card{padding:15px}.result .number{font-size:2.7rem}}
+
+/* Compact desktop layout: all controls and chart fit on one screen. */
+@media (min-width: 1050px) {
+  body { padding: 9px 15px; font-size: 12px; }
+  .wrap { max-width: 1200px; display: grid; grid-template-columns: minmax(330px, 42%) minmax(0, 1fr); gap: 8px 12px; align-items: stretch; }
+  header { grid-column: 1 / -1; margin: 0; }
+  h1 { font-size: 1.35rem; margin: 0 0 2px; }
+  header p { font-size: .79rem; margin: 0; line-height: 1.3; }
+  .card { padding: 10px 13px; margin: 0; border-radius: 9px; box-shadow: none; }
+  h2 { font-size: .88rem; margin: 0 0 7px; }
+  .grid { gap: 7px 10px; }
+  .field label { font-size: .73rem; margin-bottom: 3px; }
+  .field input { font-size: .88rem; padding: 5px 8px; border-radius: 6px; }
+  .field small { font-size: .66rem; margin-top: 2px; }
+  .controls { gap: 7px; margin-top: 5px; }
+  .controls .muted { font-size: .7rem; white-space: nowrap; }
+  .error { font-size: .7rem; min-height: 0; margin: 3px 0 0; }
+  .result { gap: 10px; }
+  .result .label { font-size: .8rem; }
+  .result .number { font-size: 2.25rem; }
+  .result .sub { font-size: .72rem; }
+  .formula { padding: 7px; font-size: .71rem; white-space: pre-line; }
+  .foot { font-size: .68rem; line-height: 1.3; margin: 5px 0; }
+  .actions { margin-top: 5px; }
+  button { font-size: .73rem; padding: 5px 9px; }
+  .legend { font-size: .72rem; }
+  .wrap > section:nth-of-type(1) { grid-column: 1; grid-row: 2; }
+  .wrap > section:nth-of-type(2) { grid-column: 1; grid-row: 3; }
+  .wrap > section:nth-of-type(3) { grid-column: 1; grid-row: 4; }
+  .wrap > section:nth-of-type(4) { grid-column: 2; grid-row: 2 / 5; display: flex; flex-direction: column; justify-content: center; }
+  .wrap > section:nth-of-type(5) { grid-column: 1 / -1; grid-row: 5; }
+  .chart { max-height: min(47vh, 370px); }
+}
+@media (min-width: 1050px) and (max-height: 720px) {
+  body { padding-top: 5px; padding-bottom: 5px; }
+  .wrap { gap: 5px 10px; }
+  .card { padding: 7px 10px; }
+  .chart { max-height: 42vh; }
+  .result .number { font-size: 1.9rem; }
+  .foot { font-size: .65rem; margin: 3px 0; }
+}
+
+/* Responsive sizing: phones, tablets, narrow laptops and large desktops. */
+html { -webkit-text-size-adjust: 100%; }
+.wrap, .card, .grid, .field { min-width: 0; }
+svg.chart { max-width: 100%; }
+input, button { min-height: 36px; }
+@media (min-width: 521px) and (max-width: 1049px) {
+  body { padding: 14px; font-size: 14px; }
+  .wrap { max-width: 760px; }
+  header { margin-bottom: 12px; }
+  h1 { font-size: 1.45rem; }
+  .card { padding: 13px 16px; margin: 10px 0; }
+  .field input { font-size: 1rem; padding: 8px 10px; }
+  .result .number { font-size: 2.5rem; }
+  .chart { max-height: 320px; }
+}
+@media (max-width: 520px) {
+  body { padding: 9px; font-size: 13px; }
+  header { margin-bottom: 10px; }
+  h1 { font-size: 1.18rem; line-height: 1.25; }
+  header p { font-size: .76rem; margin-bottom: 3px; }
+  .card { margin: 8px 0; padding: 11px; border-radius: 10px; }
+  h2 { font-size: .9rem; margin-bottom: 9px; }
+  /* Two reference fields per row on regular phones; stack on tiny phones. */
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .field label { font-size: .74rem; line-height: 1.25; }
+  .field input { padding: 8px; font-size: 16px; }
+  .field small { font-size: .68rem; }
+  .result .number { font-size: 2.2rem; }
+  .formula { padding: 9px; font-size: .73rem; white-space: pre-wrap; }
+  .chart { max-height: 240px; }
+  .legend { font-size: .72rem; }
+  .foot { font-size: .73rem; }
+  button { font-size: .8rem; }
+}
+@media (max-width: 340px) {
+  .grid { grid-template-columns: 1fr; }
+  .result .number { font-size: 1.9rem; }
+}
+@media (min-width: 1050px) and (max-height: 640px) {
+  .wrap { gap: 4px 10px; }
+  .card { padding: 6px 9px; }
+  .chart { max-height: 35vh; }
+  .foot { line-height: 1.15; margin: 2px 0; }
+}
+
+/* Adaptive display modes selected from the actual usable viewport. */
+html,body { min-width: 0; }
+body { overflow-x: hidden; }
+.wrap { width: 100%; }
+.chart { width: 100%; min-width: 0; }
+body[data-layout="wide"] { padding: clamp(6px,1.1vh,16px) clamp(10px,1.5vw,25px); }
+body[data-layout="wide"] .wrap {
+  max-width: 1550px; display: grid;
+  grid-template-columns: minmax(310px, 39fr) minmax(0,61fr);
+  gap: clamp(5px,.9vh,11px) clamp(10px,1.2vw,18px); align-items: stretch;
+}
+body[data-layout="wide"] header { grid-column: 1/-1; margin: 0; }
+body[data-layout="wide"] .wrap>section:nth-of-type(1) { grid-column:1; grid-row:2; }
+body[data-layout="wide"] .wrap>section:nth-of-type(2) { grid-column:1; grid-row:3; }
+body[data-layout="wide"] .wrap>section:nth-of-type(3) { grid-column:1; grid-row:4; }
+body[data-layout="wide"] .wrap>section:nth-of-type(4) { grid-column:2; grid-row:2/5; display:flex; flex-direction:column; justify-content:center; }
+body[data-layout="wide"] .wrap>section:nth-of-type(5) { grid-column:1/-1; grid-row:5; }
+body[data-layout="wide"] .card { margin:0; padding:clamp(7px,1.25vh,13px) clamp(9px,1vw,17px); }
+body[data-layout="wide"] h1 { font-size:clamp(17px,1.6vw,24px); margin-bottom:2px; }
+body[data-layout="wide"] header p { font-size:clamp(11px,.82vw,13px); margin:0; }
+body[data-layout="wide"] h2 { font-size:clamp(12px,1vw,15px); margin-bottom:7px; }
+body[data-layout="wide"] .field input { font-size:clamp(13px,.95vw,16px); padding:6px 8px; }
+body[data-layout="wide"] .field label { font-size:clamp(11px,.83vw,13px); margin-bottom:3px; }
+body[data-layout="wide"] .field small {font-size:11px; margin-top:2px;}
+body[data-layout="wide"] .grid { gap:7px 10px; }
+body[data-layout="wide"] .result .number { font-size:clamp(26px,3vw,42px); }
+body[data-layout="wide"] .chart { max-height: clamp(190px,47vh,510px); }
+body[data-layout="wide"] .formula {padding:7px 9px; font-size:clamp(11px,.86vw,14px); white-space:pre-line;}
+body[data-layout="wide"] .foot {font-size:clamp(10px,.78vw,13px); margin:4px 0; line-height:1.3;}
+body[data-layout="wide"] .actions {margin-top:4px;}
+body[data-layout="wide"] button {padding:5px 10px;}
+body[data-layout="wide-short"] .wrap { gap:4px 9px; }
+body[data-layout="wide-short"] .card {padding:6px 9px;}
+body[data-layout="wide-short"] .chart {max-height:36vh;}
+body[data-layout="wide-short"] .field input {padding:4px 7px; min-height:30px;}
+body[data-layout="wide-short"] .result .number {font-size:26px;}
+body[data-layout="wide-short"] .foot {font-size:10px; line-height:1.18; margin:2px 0;}
+body[data-layout="portrait"] {padding:clamp(8px,2vw,18px); font-size:14px;}
+body[data-layout="portrait"] .wrap {max-width:760px; display:block;}
+body[data-layout="portrait"] header {margin-bottom:10px;}
+body[data-layout="portrait"] h1 {font-size:clamp(18px,3.5vw,26px);}
+body[data-layout="portrait"] .card {margin:9px 0; padding:clamp(10px,2vw,18px);}
+body[data-layout="portrait"] .chart {max-height: min(44vh,350px);}
+body[data-layout="portrait"] .field input {font-size:16px;}
+body[data-layout="phone"] {padding:8px; font-size:13px;}
+body[data-layout="phone"] .wrap {max-width:100%; display:block;}
+body[data-layout="phone"] header {margin:0 0 8px;}
+body[data-layout="phone"] h1 {font-size:clamp(17px,4.2vw,22px); line-height:1.22;}
+body[data-layout="phone"] header p {font-size:12px; margin:2px 0;}
+body[data-layout="phone"] .card {margin:7px 0; padding:10px; border-radius:9px;}
+body[data-layout="phone"] .grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+body[data-layout="phone"] .field label {font-size:11px;}
+body[data-layout="phone"] .field input {font-size:16px; padding:7px; min-height:38px;}
+body[data-layout="phone"] .field small {font-size:10px;}
+body[data-layout="phone"] .result .number {font-size:30px;}
+body[data-layout="phone"] .chart {max-height: min(34vh,260px);}
+body[data-layout="phone"] .formula {font-size:11px; white-space:pre-line;}
+body[data-layout="phone"] .foot {font-size:11px; line-height:1.35;}
+body[data-layout="phone"] .controls {gap:5px;}
+body[data-layout="phone"] .controls .muted {font-size:11px; white-space:nowrap;}
+@media(max-width:340px) { body[data-layout="phone"] .grid {grid-template-columns:1fr;} }
+@media(prefers-reduced-motion:reduce) { * {scroll-behavior:auto!important;} }
+/* High contrast typography and professionally typeset derivation. */
+/* High contrast palette, including small labels and graph legends. */
+:root { color:#111827; background:#f3f5f8; }
+p, .muted, .legend, .field small, .result .sub, .foot, header p { color:#344256; }
+.field label, h1, h2, .result .label { color:#15253c; }
+.field input { border-color:#8190a5; color:#101b2b; }
+.formula { background:#eef2f7; color:#15243b; }
+.result { background:#e7f0fc; border-color:#a8c9fb; }
+.result .number { color:#114b97; }
+.calculation-help { margin-top:7px; color:#18263a; }
+.calculation-help summary { cursor:pointer; font-weight:700; color:#064b90; font-size:clamp(12px,.95vw,15px); }
+.calculation-help[open] { padding-bottom:5px; }
+.calculation-help p { margin:8px 0 6px; line-height:1.45; color:#243248; }
+.math-steps { text-align:center; display:grid; justify-items:center; gap:9px; padding:9px 4px 7px; overflow-x:auto; }
+.math-step-title {font-weight:650; font-size:12px; color:#25374b; text-align:left; width:100%; }
+.math-equation {font-family:Cambria,'STIX Two Math','Times New Roman',serif; font-size:clamp(19px,2.1vw,27px); color:#111827; line-height:1.2; white-space:nowrap; }
+.math-frac {display:inline-flex; vertical-align:middle; flex-direction:column; text-align:center; font-size:.88em; margin:0 4px; }
+.math-frac .numerator {display:block; padding:0 5px 3px; border-bottom:1.5px solid #111827; }
+.math-frac .denominator {display:block; padding:3px 5px 0; }
+.math-box {display:inline-block; border:1.4px solid #1a2638; padding:5px 10px; background:#fff; max-width:100%; }
+.math-explanation {font-size:12px; color:#344256; line-height:1.45;}
+@media(max-width:520px) { .math-equation { font-size:18px; } .math-box {padding:5px;} }
+
+/* Balanced typography: consistent text hierarchy across display sizes.
+   Expanded derivation may scroll on short screens rather than shrinking text. */
+.calculation-help, .calculation-help p, .math-explanation {
+  font-size: 13px; line-height: 1.5; color: #1f2937;
+}
+.calculation-help summary {font-size: 13px; color:#124b83;}
+.math-step-title {font-size: 13px; color:#1f2937;}
+.math-equation {font-size: 19px; line-height: 1.25;}
+.math-steps {gap:8px; padding:7px 4px;}
+.math-box {padding:4px 8px;}
+/* Correct the overly tiny text inherited from compact desktop rules. */
+body[data-layout="wide"] .foot,
+body[data-layout="wide-short"] .foot {font-size:13px;line-height:1.4;margin:5px 0;}
+body[data-layout="wide"] .formula,
+body[data-layout="wide-short"] .formula {font-size:12px;line-height:1.4;}
+body[data-layout="wide"] .calculation-help,
+body[data-layout="wide-short"] .calculation-help {font-size:13px;}
+@media (max-width:520px) {
+  .calculation-help, .calculation-help p, .math-explanation, .math-step-title {font-size:12.5px;}
+  .math-equation {font-size:17px;}
+  .math-box {padding:4px;}
+}
+
+</style>
+</head>
+<body><main class="wrap">
+<header><h1>Boiler Outdoor Reset Calculator for FS30.</h1><p>Calculate boiler supply-temperature setpoint from outdoor temperature using a straight-line reset curve. Runs entirely offline.</p></header>
+<section class="card"><h2>Reset curve reference points</h2><div class="grid">
+<div class="field"><label for="out1">Cold outdoor temperature (°C)</label><input id="out1" type="number" step="any" value="-23"><small>Corresponding boiler setpoint below</small></div>
+<div class="field"><label for="set1">Cold-weather setpoint (°C)</label><input id="set1" type="number" step="any" value="85"></div>
+<div class="field"><label for="out2">Warm outdoor temperature (°C)</label><input id="out2" type="number" step="any" value="18"></div>
+<div class="field"><label for="set2">Warm-weather setpoint (°C)</label><input id="set2" type="number" step="any" value="65"></div>
+</div></section>
+<section class="card"><h2>Outdoor temperature to calculate</h2><div class="field"><label for="target">Outdoor temperature (°C)</label><input id="target" type="number" step="any" value="-23"></div><div class="controls"><span class="muted">−40°C</span><input id="slider" type="range" min="-40" max="40" step="0.5" value="-23" aria-label="Outdoor temperature slider"><span class="muted">+40°C</span></div><p class="error" id="error" role="alert"></p></section>
+<section class="card result" aria-live="polite"><div><div class="label">Calculated boiler setpoint</div><div class="number" id="answer">85.0°C</div><div class="sub" id="rangeNote">At the cold reference point</div></div></section>
+<section class="card"><h2>Reset curve</h2><svg id="graph" class="chart" viewBox="0 0 760 370" role="img" aria-label="Outdoor temperature versus boiler setpoint chart"></svg><div class="legend"><span class="line"></span>Linear setpoint curve <span class="dot"></span>Selected outdoor temperature</div></section>
+<section class="card"><h2>Calculation</h2><div class="formula" id="formula">Setpoint = 85 + (Outdoor + 23) × (−20 / 41)</div><p class="foot">The curve is calculated as <strong>T<sub>set</sub> = T<sub>1</sub> + (T<sub>out</sub> − T<sub>out1</sub>) × (T<sub>2</sub> − T<sub>1</sub>) / (T<sub>out2</sub> − T<sub>out1</sub>)</strong>.</p><p class="foot">Values beyond the two reference temperatures are <strong>linearly extrapolated</strong>, not limited to the reference setpoints. Actual boiler controls may impose minimum/maximum setpoints or warm-weather shutdown.</p><!-- Original FS30 outdoor-reset reference points: (-23°C, 85°C) and (+18°C, 65°C).
+     A straight line y = mx + b has slope m = (65 - 85) / (18 - (-23)) = -20/41 ≈ -0.487804878.
+     Intercept b = 85 - m*(-23) ≈ 73.7804878.
+     Therefore setpoint = 73.7804878 - 0.487804878*(outdoor °C).
+     The live calculation above uses the editable endpoint fields rather than hard-coded numbers. -->
+<details class="calculation-help"><summary>How the setpoint is calculated (original endpoints)</summary>
+<p>Based on the two reference points: <strong>−23°C outdoors → 85°C boiler</strong> and <strong>+18°C outdoors → 65°C boiler</strong>.</p>
+<div class="math-steps" aria-label="Slope equals 65 minus 85 divided by 18 minus negative 23, equals negative 0.4878">
+  <div class="math-step-title">Step 1 — Calculate the slope</div>
+  <div class="math-equation"><i>m</i> = <span class="math-frac"><span class="numerator">65 − 85</span><span class="denominator">18 − (−23)</span></span> = −0.4878</div>
+  <div class="math-step-title">Step 2 — Substitute the reference point to find the equation</div>
+  <div class="math-equation math-box"><i>T</i><sub>boiler</sub> = 73.7805 − 0.4878<i>T</i><sub>outside</sub></div>
+</div>
+<p class="math-explanation">The setpoint decreases by approximately <strong>0.488°C</strong> for every <strong>1°C rise</strong> in outdoor temperature. For example, at <strong>0°C outdoors</strong>, the calculated boiler setpoint is <strong>73.8°C</strong>.</p>
+<p class="math-explanation">This derivation uses the <strong>original endpoints</strong>. The main calculator and graph update if you edit the reference values. Outside the two endpoints, results are linear extrapolations.</p>
+</details><div class="actions"><button id="reset" type="button">Restore original values</button></div></section>
+</main>
+<script>
+(function(){'use strict';
+const ids=['out1','set1','out2','set2','target'];const $=id=>document.getElementById(id);const NS='http://www.w3.org/2000/svg';
+function make(name,attrs,text){const el=document.createElementNS(NS,name);for(const [k,v] of Object.entries(attrs||{}))el.setAttribute(k,v);if(text!==undefined)el.textContent=text;return el}
+function fmt(n,d=1){return Number(n).toFixed(d)}
+function update(){const v=Object.fromEntries(ids.map(id=>[id,Number($(id).value)]));const valid=ids.every(id=>$(id).value.trim()!==''&&Number.isFinite(v[id]));$('slider').value=Math.min(40,Math.max(-40,v.target));if(!valid||v.out1===v.out2){$('error').textContent=!valid?'Enter a valid number in every field.':'The two outdoor reference temperatures must be different.';$('answer').textContent='—';$('rangeNote').textContent='';$('formula').textContent='—';$('graph').replaceChildren();return}
+$('error').textContent='';const slope=(v.set2-v.set1)/(v.out2-v.out1),intercept=v.set1-slope*v.out1;const y=intercept+slope*v.target;$('answer').textContent=fmt(y)+'°C';const lo=Math.min(v.out1,v.out2),hi=Math.max(v.out1,v.out2);$('rangeNote').textContent=v.target<lo||v.target>hi?'Extrapolated beyond reference points':'Interpolated between reference points';$('formula').textContent=`Setpoint = ${fmt(v.set1,2)} + (Outdoor − (${fmt(v.out1,2)})) × ${fmt(slope,4)}\nAt ${fmt(v.target,1)}°C outside → ${fmt(y,2)}°C boiler setpoint`;
+const svg=$('graph');svg.replaceChildren();const W=760,H=370,L=73,R=26,T=25,B=51;let xmin=Math.floor(Math.min(v.out1,v.out2,v.target,-40)/10)*10,xmax=Math.ceil(Math.max(v.out1,v.out2,v.target,40)/10)*10;if(xmax===xmin)xmax=xmin+10;const ya=[intercept+slope*xmin,intercept+slope*xmax,v.set1,v.set2,y];let ymin=Math.floor((Math.min(...ya)-5)/10)*10,ymax=Math.ceil((Math.max(...ya)+5)/10)*10;if(ymax===ymin)ymax=ymin+10;const X=x=>L+(x-xmin)/(xmax-xmin)*(W-L-R),Y=t=>H-B-(t-ymin)/(ymax-ymin)*(H-T-B);for(let i=0;i<=5;i++){const yy=ymin+(ymax-ymin)*i/5,py=Y(yy);svg.append(make('line',{x1:L,y1:py,x2:W-R,y2:py,stroke:'#d9e0e9'}));svg.append(make('text',{x:L-10,y:py+5,'text-anchor':'end',fill:'#344256','font-size':15},fmt(yy,0)))}for(let i=0;i<=8;i++){const xx=xmin+(xmax-xmin)*i/8,px=X(xx);svg.append(make('line',{x1:px,y1:T,x2:px,y2:H-B,stroke:'#e2e7ee'}));svg.append(make('text',{x:px,y:H-B+22,'text-anchor':'middle',fill:'#344256','font-size':15},fmt(xx,0)))}svg.append(make('line',{x1:L,y1:H-B,x2:W-R,y2:H-B,stroke:'#8997a8'}));svg.append(make('line',{x1:L,y1:T,x2:L,y2:H-B,stroke:'#8997a8'}));svg.append(make('line',{x1:X(xmin),y1:Y(intercept+slope*xmin),x2:X(xmax),y2:Y(intercept+slope*xmax),stroke:'#2673c8','stroke-width':3}));for(const [x1,y1] of [[v.out1,v.set1],[v.out2,v.set2]]){svg.append(make('circle',{cx:X(x1),cy:Y(y1),r:5.5,fill:'#2673c8',stroke:'white','stroke-width':2}))}svg.append(make('line',{x1:X(v.target),y1:Y(y),x2:X(v.target),y2:H-B,stroke:'#e07928','stroke-dasharray':'5 5','stroke-width':2}));svg.append(make('circle',{cx:X(v.target),cy:Y(y),r:7,fill:'#e07928',stroke:'white','stroke-width':2}));const tx=Math.min(W-115,Math.max(L+10,X(v.target)+11)),ty=Math.max(T+15,Math.min(H-B-14,Y(y)-12));svg.append(make('text',{x:tx,y:ty,fill:'#8e380b','font-size':15,'font-weight':700},`${fmt(v.target)}°C → ${fmt(y)}°C`));svg.append(make('text',{x:W/2,y:H-8,'text-anchor':'middle',fill:'#23364e','font-size':14},'Outdoor temperature (°C)'));svg.append(make('text',{transform:`translate(18 ${H/2}) rotate(-90)`,'text-anchor':'middle',fill:'#23364e','font-size':14},'Boiler setpoint (°C)'))}
+ids.forEach(id=>$(id).addEventListener('input',()=>{if(id==='target'&&$('target').value!=='')$('slider').value=$('target').value;update()}));$('slider').addEventListener('input',()=>{$('target').value=$('slider').value;update()});$('reset').addEventListener('click',()=>{for(const [id,val] of Object.entries({out1:-23,set1:85,out2:18,set2:65,target:-23}))$(id).value=val;update()});update();
+})();
+</script>
+<script>
+/* Use effective viewport dimensions rather than untrustworthy device names.
+   Recomputes whenever the browser is resized, rotated or zoomed. */
+(function(){
+  const status=document.createElement('span');
+  status.id='displayMode';
+  status.className='muted';
+  status.style.cssText='display:block;font-size:11px;margin-top:3px;';
+  const header=document.querySelector('header');
+  header.append(status);
+  function chooseLayout(){
+    const w=document.documentElement.clientWidth;
+    const h=window.innerHeight;
+    const aspect=w/Math.max(h,1);
+    const coarse=window.matchMedia('(pointer:coarse)').matches;
+    const phone=(w<600)||((w<720)&&coarse);
+    // Wide layouts need adequate horizontal AND vertical room, not just a desktop user agent.
+    const wide=!phone && w>=850 && aspect>=1.18;
+    const mode=phone?'phone':wide?(h<690?'wide-short':'wide'):'portrait';
+    document.body.dataset.layout=mode;
+    const orientation=aspect>=1?'landscape':'portrait';
+    status.textContent=`Auto layout: ${phone?'mobile':wide?'landscape / desktop':'portrait / compact'} · ${orientation} · ${w} × ${h}px`;
+  }
+  window.addEventListener('resize',chooseLayout,{passive:true});
+  window.addEventListener('orientationchange',chooseLayout,{passive:true});
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',chooseLayout,{passive:true});
+  chooseLayout();
+})();
+</script></body></html>
